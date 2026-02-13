@@ -232,7 +232,7 @@ int main()
 {
     welcoming_message();
 
-    char command;
+    char command = 0;
 
     FILE *fptr;
 
