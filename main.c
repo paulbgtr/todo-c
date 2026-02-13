@@ -47,6 +47,8 @@ int view_tasks()
         return 1;
     }
 
+    fclose(fptr);
+
     return 0;
 }
 
