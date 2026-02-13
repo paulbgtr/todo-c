@@ -53,6 +53,55 @@ int create_new_task(FILE *fptr)
     return 0;
 }
 
+int delete_task(FILE *fptr)
+{
+    int id;
+    FILE *temp = fopen("temp.txt", "w");
+
+    printf("enter id of the task to delete:\n");
+    scanf("%d", &id);
+
+    fptr = fopen("tasks.txt", "r");
+
+    if (!fptr)
+    {
+        perror("deleting task: ");
+        return 1;
+    }
+
+    char buffer[256];
+
+    int deleted_id = -1;
+
+    while (fgets(buffer, sizeof(buffer), fptr) != NULL)
+    {
+        int found_id;
+
+        sscanf(buffer, "%d", &found_id);
+
+        if (found_id == id)
+        {
+            deleted_id = id;
+
+            continue;
+        }
+        fputs(buffer, temp);
+    }
+
+    fclose(fptr);
+    fclose(temp);
+
+    if (deleted_id == -1)
+    {
+        return 1;
+    }
+
+    remove("tasks.txt");
+    rename("temp.txt", "tasks.txt");
+
+    return 0;
+}
+
 int main()
 {
     char command;
@@ -70,45 +119,15 @@ int main()
         }
         break;
     case 'd':
-    {
-        int id;
-        FILE *temp = fopen("temp.txt", "w");
-
-        printf("enter id of the task to delete:\n");
-        scanf("%d", &id);
-
-        fptr = fopen("tasks.txt", "r");
-
-        if (!fptr)
+        if (delete_task(fptr) == 1)
         {
-            perror("deleting task: ");
+            printf("task not found!\n");
             return 1;
         }
 
-        char buffer[256];
-
-        while (fgets(buffer, sizeof(buffer), fptr) != NULL)
-        {
-            int found_id;
-
-            sscanf(buffer, "%d", &found_id);
-
-            if (found_id != id)
-            {
-                fputs(buffer, temp);
-            }
-        }
-
-        fclose(fptr);
-        fclose(temp);
-
-        remove("tasks.txt");
-        rename("temp.txt", "tasks.txt");
-
-        printf("task with id %d was deleted\n", id);
+        printf("task was deleted\n");
 
         break;
-    }
     default:
         printf("unsupported command!\n");
         return 0;
