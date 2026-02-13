@@ -1,18 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct
-{
-    int id;
-    char title[100];
-    int completed; // 0 / 1
-} Task;
-
-void print_task(Task task)
-{
-    printf("id: %d | title: %s | completed: %d\n", task.id, task.title, task.completed);
-}
-
 int get_new_id(FILE *fptr)
 {
     fptr = fopen("tasks.txt", "r");
@@ -28,6 +16,26 @@ int get_new_id(FILE *fptr)
     fclose(fptr);
 
     return id + 1;
+}
+
+int view_tasks(FILE *fptr)
+{
+    fptr = fopen("tasks.txt", "r");
+
+    if (!fptr)
+    {
+        perror("view tasks: ");
+        return 1;
+    }
+
+    char buffer[256];
+
+    while (fgets(buffer, sizeof(buffer), fptr) != NULL)
+    {
+        printf("%s", buffer);
+    }
+
+    return 0;
 }
 
 int create_new_task(FILE *fptr)
@@ -155,14 +163,8 @@ int change_status(FILE *fptr)
     return 0;
 }
 
-int main()
+int keyboard_handler(FILE *fptr, char command)
 {
-    char command;
-
-    FILE *fptr;
-
-    scanf(" %c", &command);
-
     switch (command)
     {
     case 'n':
@@ -191,8 +193,29 @@ int main()
         printf("task was deleted\n");
 
         break;
+    case 'a':
+        if (view_tasks(fptr) == 1)
+        {
+            return 1;
+        }
+        break;
     default:
         printf("unsupported command!\n");
-        return 0;
     }
+    return 0;
+}
+
+int main()
+{
+    char command;
+
+    FILE *fptr;
+
+    scanf(" %c", &command);
+
+    if (keyboard_handler(fptr, command) == 1)
+    {
+        return 1;
+    }
+    return 0;
 }
