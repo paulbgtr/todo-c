@@ -60,17 +60,22 @@ int view_tasks()
 
 void create_new_task()
 {
-    char title[100];
-
-    printf("enter task title\n");
-    scanf("%99s", title);
-
     FILE *fptr = fopen("tasks.txt", "a");
 
     if (!fptr)
     {
         perror("adding new task:");
     }
+
+    char title[100];
+
+    printf("enter task title\n");
+    if (fgets(title, sizeof(title), stdin) == NULL)
+    {
+        return;
+    }
+
+    title[strcspn(title, "\n")] = 0;
 
     int new_id = get_new_id();
 
@@ -79,7 +84,7 @@ void create_new_task()
         return;
     }
 
-    fprintf(fptr, "%d %s 0\n", new_id, title);
+    fprintf(fptr, "%d|%s|0\n", new_id, title);
 
     fclose(fptr);
 
@@ -174,7 +179,7 @@ int change_status()
         char found_title[100];
         int found_status;
 
-        if (sscanf(buffer, "%d %s %d", &found_id, found_title, &found_status) != 3)
+        if (sscanf(buffer, "%d|%s|%d", &found_id, found_title, &found_status) != 3)
         {
             printf("failed getting task\n");
         }
@@ -187,12 +192,12 @@ int change_status()
 
         if (found_status == 0)
         {
-            fprintf(temp, "%d %s 1\n", found_id, found_title);
+            fprintf(temp, "%d|%s|1\n", found_id, found_title);
             is_changed_status = 1;
         }
         else if (found_status == 1)
         {
-            fprintf(temp, "%d %s 0\n", found_id, found_title);
+            fprintf(temp, "%d|%s|0\n", found_id, found_title);
             is_changed_status = 1;
         }
     }
@@ -255,12 +260,18 @@ int main()
     welcoming_message();
 
     char command = 0;
+    char buffer[16];
 
     FILE *fptr;
 
     while (command != 'q')
     {
-        scanf(" %c", &command);
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL)
+        {
+            return 1;
+        }
+
+        command = buffer[0];
         keyboard_handler(command);
     }
 
