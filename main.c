@@ -35,6 +35,29 @@ int get_new_id(FILE *fptr)
     return id + 1;
 }
 
+int create_new_task(FILE *fptr)
+{
+    char title[100];
+
+    printf("enter task title: ");
+    scanf("%99s", title);
+
+    fptr = fopen("tasks.txt", "a");
+
+    if (!fptr)
+    {
+        perror("adding new task:");
+        return 1;
+    }
+
+    int new_id = get_new_id(fptr);
+
+    fprintf(fptr, "%d %s 0\n", new_id, title);
+
+    fclose(fptr);
+    return 0;
+}
+
 int main()
 {
     char command;
@@ -43,30 +66,16 @@ int main()
 
     scanf(" %c", &command);
 
-    if (command == 'n')
+    switch (command)
     {
-        char title[100];
-
-        printf("enter task title: ");
-        scanf("%99s", title);
-
-        fptr = fopen("tasks.txt", "a");
-
-        if (!fptr)
+    case 'n':
+        if (create_new_task(fptr) == 1)
         {
-            perror("adding new task:");
             return 1;
         }
-
-        int new_id = get_new_id(fptr);
-
-        fprintf(fptr, "%d %s 0\n", new_id, title);
-
-        fclose(fptr);
+        break;
+    default:
+        printf("unsupported command!\n");
         return 0;
     }
-
-    printf("unsupported command!\n");
-
-    return 0;
 }
