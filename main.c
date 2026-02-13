@@ -79,14 +79,20 @@ int delete_task()
     FILE *temp = fopen("temp.txt", "w");
     FILE *fptr = fopen("tasks.txt", "r");
 
-    printf("enter id of the task to delete\n");
-    scanf("%d", &id);
+    if (!temp)
+    {
+        perror("temp file");
+        return 1;
+    }
 
     if (!fptr)
     {
         perror("deleting task: ");
         return 1;
     }
+
+    printf("enter id of the task to delete\n");
+    scanf("%d", &id);
 
     char buffer[256];
     int is_deleted = 0;
@@ -131,14 +137,20 @@ int change_status()
     FILE *temp = fopen("temp.txt", "w");
     FILE *fptr = fopen("tasks.txt", "r");
 
-    printf("enter id of task to change status\n");
-    scanf("%d", &id);
+    if (!temp)
+    {
+        perror("temp file");
+        return 1;
+    }
 
     if (!fptr)
     {
         perror("changing status: ");
         return 1;
     }
+
+    printf("enter id of task to change status\n");
+    scanf("%d", &id);
 
     char buffer[256];
     int is_changed_status = 0;
