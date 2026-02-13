@@ -11,7 +11,10 @@ int get_new_id(FILE *fptr)
 
     while (fgets(buffer, sizeof(buffer), fptr) != NULL)
     {
-        sscanf(buffer, "%d", &id);
+        if (sscanf(buffer, "%d", &id) != 1)
+        {
+            printf("failed getting task.\n");
+        }
     }
     fclose(fptr);
 
@@ -24,25 +27,34 @@ int view_tasks(FILE *fptr)
 
     if (!fptr)
     {
-        perror("view tasks: ");
+        printf("no tasks are present\n");
         return 1;
     }
 
     char buffer[256];
 
+    int count = 0;
+
     while (fgets(buffer, sizeof(buffer), fptr) != NULL)
     {
         printf("%s", buffer);
+        count++;
+    }
+
+    if (count == 0)
+    {
+        printf("no tasks are present\n");
+        return 1;
     }
 
     return 0;
 }
 
-int create_new_task(FILE *fptr)
+void create_new_task(FILE *fptr)
 {
     char title[100];
 
-    printf("enter task title: ");
+    printf("enter task title\n");
     scanf("%99s", title);
 
     fptr = fopen("tasks.txt", "a");
@@ -50,7 +62,6 @@ int create_new_task(FILE *fptr)
     if (!fptr)
     {
         perror("adding new task:");
-        return 1;
     }
 
     int new_id = get_new_id(fptr);
@@ -58,7 +69,8 @@ int create_new_task(FILE *fptr)
     fprintf(fptr, "%d %s 0\n", new_id, title);
 
     fclose(fptr);
-    return 0;
+
+    printf("added a task with id %d\n", new_id);
 }
 
 int delete_task(FILE *fptr)
@@ -66,7 +78,7 @@ int delete_task(FILE *fptr)
     int id;
     FILE *temp = fopen("temp.txt", "w");
 
-    printf("enter id of the task to delete:\n");
+    printf("enter id of the task to delete\n");
     scanf("%d", &id);
 
     fptr = fopen("tasks.txt", "r");
@@ -84,7 +96,10 @@ int delete_task(FILE *fptr)
     {
         int found_id;
 
-        sscanf(buffer, "%d", &found_id);
+        if (sscanf(buffer, "%d", &found_id) != 1)
+        {
+            printf("failed getting task\n");
+        }
 
         if (found_id == id)
         {
@@ -103,8 +118,10 @@ int delete_task(FILE *fptr)
 
     if (is_deleted == 0)
     {
+        printf("no task with id %d\n", id);
         return 1;
     }
+    printf("task was deleted\n");
 
     return 0;
 }
@@ -120,6 +137,12 @@ int change_status(FILE *fptr)
 
     fptr = fopen("tasks.txt", "r");
 
+    if (!fptr)
+    {
+        perror("changing status: ");
+        return 1;
+    }
+
     char buffer[256];
     int is_changed_status = 0;
 
@@ -129,7 +152,10 @@ int change_status(FILE *fptr)
         char found_title[100];
         int found_status;
 
-        sscanf(buffer, "%d %s %d", &found_id, found_title, &found_status);
+        if (sscanf(buffer, "%d %s %d", &found_id, found_title, &found_status) != 3)
+        {
+            printf("failed getting task\n");
+        }
 
         if (found_id != id)
         {
@@ -157,65 +183,64 @@ int change_status(FILE *fptr)
 
     if (is_changed_status != 1)
     {
+        printf("no task with id %d found.\n", id);
         return 1;
     }
+
+    printf("changed status of task %d\n", id);
 
     return 0;
 }
 
-int keyboard_handler(FILE *fptr, char command)
+void help()
+{
+    printf("available commands:\nn - create new task\n d - delete task\n s - change status\n a - view all tasks\n q - quit\n");
+}
+
+void keyboard_handler(FILE *fptr, char command)
 {
     switch (command)
     {
     case 'n':
-        if (create_new_task(fptr) == 1)
-        {
-            return 1;
-        }
+        create_new_task(fptr);
         break;
     case 'd':
-        if (delete_task(fptr) == 1)
-        {
-            printf("task not found!\n");
-            return 1;
-        }
-
-        printf("task was deleted\n");
-
+        delete_task(fptr);
         break;
     case 's':
-        if (delete_task(fptr) == 1)
-        {
-            printf("task not found!\n");
-            return 1;
-        }
-
-        printf("task was deleted\n");
-
+        change_status(fptr);
         break;
     case 'a':
-        if (view_tasks(fptr) == 1)
-        {
-            return 1;
-        }
+        view_tasks(fptr);
+        break;
+    case 'h':
+        help();
+        break;
+    case 'q':
         break;
     default:
         printf("unsupported command!\n");
     }
-    return 0;
+}
+
+void welcoming_message()
+{
+    printf("welcome to todo-c.\ntype 'h' to view available commands.\n");
 }
 
 int main()
 {
+    welcoming_message();
+
     char command;
 
     FILE *fptr;
 
-    scanf(" %c", &command);
-
-    if (keyboard_handler(fptr, command) == 1)
+    while (command != 'q')
     {
-        return 1;
+        scanf(" %c", &command);
+        keyboard_handler(fptr, command);
     }
+
     return 0;
 }
