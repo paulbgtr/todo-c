@@ -70,8 +70,7 @@ int delete_task(FILE *fptr)
     }
 
     char buffer[256];
-
-    int deleted_id = -1;
+    int is_deleted = 0;
 
     while (fgets(buffer, sizeof(buffer), fptr) != NULL)
     {
@@ -81,7 +80,7 @@ int delete_task(FILE *fptr)
 
         if (found_id == id)
         {
-            deleted_id = id;
+            is_deleted = 1;
 
             continue;
         }
@@ -91,13 +90,67 @@ int delete_task(FILE *fptr)
     fclose(fptr);
     fclose(temp);
 
-    if (deleted_id == -1)
+    remove("tasks.txt");
+    rename("temp.txt", "tasks.txt");
+
+    if (is_deleted == 0)
     {
         return 1;
     }
 
+    return 0;
+}
+
+int change_status(FILE *fptr)
+{
+
+    int id;
+    FILE *temp = fopen("temp.txt", "w");
+
+    printf("enter id of task to change status\n");
+    scanf("%d", &id);
+
+    fptr = fopen("tasks.txt", "r");
+
+    char buffer[256];
+    int is_changed_status = 0;
+
+    while (fgets(buffer, sizeof(buffer), fptr) != NULL)
+    {
+        int found_id;
+        char found_title[100];
+        int found_status;
+
+        sscanf(buffer, "%d %s %d", &found_id, found_title, &found_status);
+
+        if (found_id != id)
+        {
+            fputs(buffer, temp);
+            continue;
+        }
+
+        if (found_status == 0)
+        {
+            fprintf(temp, "%d %s 1\n", found_id, found_title);
+            is_changed_status = 1;
+        }
+        else if (found_status == 1)
+        {
+            fprintf(temp, "%d %s 0\n", found_id, found_title);
+            is_changed_status = 1;
+        }
+    }
+
+    fclose(fptr);
+    fclose(temp);
+
     remove("tasks.txt");
     rename("temp.txt", "tasks.txt");
+
+    if (is_changed_status != 1)
+    {
+        return 1;
+    }
 
     return 0;
 }
@@ -119,6 +172,16 @@ int main()
         }
         break;
     case 'd':
+        if (delete_task(fptr) == 1)
+        {
+            printf("task not found!\n");
+            return 1;
+        }
+
+        printf("task was deleted\n");
+
+        break;
+    case 's':
         if (delete_task(fptr) == 1)
         {
             printf("task not found!\n");
