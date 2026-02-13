@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-int get_new_id(FILE *fptr)
+int get_new_id()
 {
-    fptr = fopen("tasks.txt", "r");
+    FILE *fptr = fopen("tasks.txt", "r");
 
     char buffer[256];
 
@@ -21,9 +21,9 @@ int get_new_id(FILE *fptr)
     return id + 1;
 }
 
-int view_tasks(FILE *fptr)
+int view_tasks()
 {
-    fptr = fopen("tasks.txt", "r");
+    FILE *fptr = fopen("tasks.txt", "r");
 
     if (!fptr)
     {
@@ -50,21 +50,21 @@ int view_tasks(FILE *fptr)
     return 0;
 }
 
-void create_new_task(FILE *fptr)
+void create_new_task()
 {
     char title[100];
 
     printf("enter task title\n");
     scanf("%99s", title);
 
-    fptr = fopen("tasks.txt", "a");
+    FILE *fptr = fopen("tasks.txt", "a");
 
     if (!fptr)
     {
         perror("adding new task:");
     }
 
-    int new_id = get_new_id(fptr);
+    int new_id = get_new_id();
 
     fprintf(fptr, "%d %s 0\n", new_id, title);
 
@@ -73,15 +73,14 @@ void create_new_task(FILE *fptr)
     printf("added a task with id %d\n", new_id);
 }
 
-int delete_task(FILE *fptr)
+int delete_task()
 {
     int id;
     FILE *temp = fopen("temp.txt", "w");
+    FILE *fptr = fopen("tasks.txt", "r");
 
     printf("enter id of the task to delete\n");
     scanf("%d", &id);
-
-    fptr = fopen("tasks.txt", "r");
 
     if (!fptr)
     {
@@ -126,16 +125,14 @@ int delete_task(FILE *fptr)
     return 0;
 }
 
-int change_status(FILE *fptr)
+int change_status()
 {
-
     int id;
     FILE *temp = fopen("temp.txt", "w");
+    FILE *fptr = fopen("tasks.txt", "r");
 
     printf("enter id of task to change status\n");
     scanf("%d", &id);
-
-    fptr = fopen("tasks.txt", "r");
 
     if (!fptr)
     {
@@ -197,21 +194,21 @@ void help()
     printf("available commands:\nn - create new task\n d - delete task\n s - change status\n a - view all tasks\n q - quit\n");
 }
 
-void keyboard_handler(FILE *fptr, char command)
+void keyboard_handler(char command)
 {
     switch (command)
     {
     case 'n':
-        create_new_task(fptr);
+        create_new_task();
         break;
     case 'd':
-        delete_task(fptr);
+        delete_task();
         break;
     case 's':
-        change_status(fptr);
+        change_status();
         break;
     case 'a':
-        view_tasks(fptr);
+        view_tasks();
         break;
     case 'h':
         help();
@@ -239,7 +236,7 @@ int main()
     while (command != 'q')
     {
         scanf(" %c", &command);
-        keyboard_handler(fptr, command);
+        keyboard_handler(command);
     }
 
     return 0;
