@@ -5,6 +5,12 @@ int get_new_id()
 {
     FILE *fptr = fopen("tasks.txt", "r");
 
+    if (!fptr)
+    {
+        perror("getting id: ");
+        return -1;
+    }
+
     char buffer[256];
 
     int id = 0;
@@ -67,6 +73,11 @@ void create_new_task()
     }
 
     int new_id = get_new_id();
+
+    if (new_id == -1)
+    {
+        return;
+    }
 
     fprintf(fptr, "%d %s 0\n", new_id, title);
 
